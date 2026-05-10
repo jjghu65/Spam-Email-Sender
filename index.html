@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outreach — Email Sender</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0b0d11;
+  --surface: #13151a;
+  --surface2: #1a1d24;
+  --border: rgba(255,255,255,0.07);
+  --border-hover: rgba(255,255,255,0.14);
+  --text: #eeeae3;
+  --muted: #6b6f7a;
+  --muted2: #4a4d57;
+  --accent: #c8f04a;
+  --accent-dark: #a8cc30;
+  --accent-dim: rgba(200,240,74,0.1);
+  --success: #4ade80;
+  --error: #f87171;
+  --info: #60a5fa;
+  --warn-bg: rgba(255,160,0,0.08);
+  --warn-border: rgba(255,160,0,0.25);
+  --warn-text: #fbbf24;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Geist', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(200,240,74,0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 6rem;
+}
+
+.header {
+  margin-bottom: 3rem;
+  animation: fadeUp 0.6s ease both;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: var(--accent);
+}
+
+h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+
+h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 0.75rem;
+  line-height: 1.6;
+}
+
+.section {
+  margin-bottom: 1.25rem;
+  animation: fadeUp 0.6s ease both;
+}
+
+.section:nth-child(2) { animation-delay: 0.05s; }
+.section:nth-child(3) { animation-delay: 0.1s; }
+.section:nth-child(4) { animation-delay: 0.15s; }
+.section:nth-child(5) { animation-delay: 0.2s; }
+.section:nth-child(6) { animation-delay: 0.25s; }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: border-color 0.2s;
+}
+
+.panel:hover { border-color: var(--border-hover); }
+
+/* Highlight the script URL panel */
+.panel.script-panel {
+  border-color: rgba(200,240,74,0.18);
+  background: linear-gradient(135deg, #13151a 0%, #16191f 100%);
+}
+
+.panel-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 1.25rem;
+}
+
+.panel-label .badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid rgba(200,240,74,0.2);
+  border-radius: 4px;
+  padding: 2px 7px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.field { margin-bottom: 1.1rem; }
+.field:last-child { margin-bottom: 0; }
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 7px;
+  letter-spacing: 0.2px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="url"],
+textarea {
+  width: 100%;
+  font-family: 'Geist', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  -webkit-appearance: none;
+}
+
+/* Special styling for the script URL field */
+#appsScriptUrl {
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  border-color: rgba(200,240,74,0.2);
+}
+
+#appsScriptUrl:focus {
+  border-color: rgba(200,240,74,0.5);
+  background: #1a1d22;
+  box-shadow: 0 0 0 3px rgba(200,240,74,0.06);
+}
+
+/* URL validity indicator */
+.url-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 7px;
+  font-size: 11.5px;
+  color: var(--muted2);
+  min-height: 18px;
+  transition: color 0.2s;
+}
+
+.url-status.valid { color: var(--success); }
+.url-status.invalid { color: var(--error); }
+
+.url-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+input::placeholder, textarea::placeholder { color: var(--muted2); }
+
+input:focus, textarea:focus {
+  border-color: rgba(200,240,74,0.4);
+  background: #1e2028;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 140px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.hint {
+  font-size: 11.5px;
+  color: var(--muted2);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.hint a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(200,240,74,0.3);
+}
+.hint a:hover { border-bottom-color: var(--accent); }
+
+.tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 9px;
+}
+
+.tag {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid rgba(200,240,74,0.2);
+  border-radius: 6px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  user-select: none;
+}
+
+.tag:hover {
+  background: rgba(200,240,74,0.18);
+  border-color: rgba(200,240,74,0.4);
+}
+
+.stats-row {
+  display: flex;
+  gap: 20px;
+  margin-top: 1rem;
+}
+
+.stat {
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: 'Geist Mono', monospace;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: 500;
+  display: block;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.send-stop-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.send-btn, .stop-btn {
+  flex: 1;
+  padding: 14px;
+  font-family: 'Geist', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s, opacity 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.send-btn {
+  background: var(--accent);
+  color: #0b0d11;
+}
+
+.send-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.send-btn:hover { background: var(--accent-dark); }
+.send-btn:active { transform: scale(0.99); }
+.send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.stop-btn {
+  background: var(--error);
+  color: white;
+  font-weight: 600;
+}
+
+.stop-btn:hover { background: #ef4444; }
+.stop-btn:active { transform: scale(0.99); }
+.stop-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.log-panel {
+  display: none;
+  margin-top: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  animation: fadeUp 0.3s ease both;
+}
+
+.log-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.log-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.5s ease infinite;
+}
+
+.log {
+  padding: 14px 16px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  max-height: 220px;
+  overflow-y: auto;
+  line-height: 1.8;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.log-line { color: var(--muted); }
+.log-line.ok { color: var(--success); }
+.log-line.err { color: var(--error); }
+.log-line.info { color: var(--info); }
+
+.notice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: rgba(255,0,0,0.1);
+  border: 1px solid rgba(255,0,0,0.3);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 1.5rem;
+  font-size: 12.5px;
+  color: #fca5a5;
+  line-height: 1.5;
+  animation: fadeUp 0.6s ease both;
+  animation-delay: 0.25s;
+}
+
+.notice-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+/* Setup guide callout */
+.setup-guide {
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 1rem;
+  font-size: 12px;
+  color: var(--warn-text);
+  line-height: 1.7;
+}
+
+.setup-guide strong {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  opacity: 0.8;
+}
+
+.setup-guide ol {
+  padding-left: 1.2em;
+  color: rgba(251,191,36,0.75);
+}
+
+.setup-guide ol li { margin-bottom: 2px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@media (max-width: 480px) {
+  .page { padding: 2.5rem 1rem 4rem; }
+  .send-stop-row { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="eyebrow">spam tool</div>
+    <h1>Send <em>bulk</em><br> emails</h1>
+    <p class="subtitle">No delays. Repeats your list FOREVER until you STOP.</p>
+  </div>
+
+  <div class="notice">
+    <span class="notice-icon">⚠️</span>
+    <strong>NO DELAYS - CONTINUOUS MODE:</strong> Emails fire immediately and repeat your list forever until STOP. 
+    Gmail API limits WILL apply. Use responsibly — your account might get blocked.
+  </div>
+
+  <!-- ── STEP 1: Apps Script URL ── -->
+  <div class="section">
+    <div class="panel script-panel">
+      <div class="panel-label">Google Apps Script URL <span class="badge">REQUIRED FIRST</span></div>
+
+      <div class="field">
+        <label>Your deployed Apps Script web app URL</label>
+        <input
+          type="url"
+          id="appsScriptUrl"
+          placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+          oninput="validateUrl()"
+        />
+        <div class="url-status" id="urlStatus">
+          <span class="url-status-dot"></span>
+          <span>Paste your /exec URL above</span>
+        </div>
+      </div>
+
+      <div class="setup-guide">
+        <strong>📋 How to get your URL</strong>
+        <ol>
+          <li>Open <a href="https://script.google.com" target="_blank" style="color:inherit;text-decoration:underline;">script.google.com</a> → New project</li>
+          <li>Paste your Gmail-sending Apps Script code</li>
+          <li>Deploy → New deployment → Web app → Anyone → Deploy</li>
+          <li>Copy the <strong>/exec</strong> URL and paste it above</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: Email content ── -->
+  <div class="section">
+    <div class="panel">
+      <div class="panel-label">Email content</div>
+
+      <div class="field">
+        <label>Subject line</label>
+        <input type="text" id="subject" placeholder="Write whatever the hell you want" />
+      </div>
+
+      <div class="field">
+        <label>Message body</label>
+        <textarea id="body" placeholder="Just write what you want in here...
+
+Regards,
+You"></textarea>
+        <div class="tags">
+          <span class="tag" onclick="insertVar('{name}')">+ {name}</span>
+          <span class="tag" onclick="insertVar('{email}')">+ {email}</span>
+          <span class="tag" onclick="insertVar('{company}')">+ {company}</span>
+        </div>
+        <p class="hint">Click a tag to insert it at your cursor position</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: Recipients ── -->
+  <div class="section">
+    <div class="panel">
+      <div class="panel-label">Recipients</div>
+
+      <div class="field">
+        <label>Contact list</label>
+        <textarea id="recipients" placeholder="Alice Johnson, alice@manufacturer.com, AcmeCorp
+Bob Smith, bob@factory.com, BuildCo
+Carol Lee, carol@supplies.com, SupplyHQ" style="min-height:160px;" oninput="updateCount()"></textarea>
+        <p id="rec-count" style="font-size:11.5px;color:var(--muted2);margin-top:6px;">— no recipients yet</p>
+        <p class="hint">One per line &nbsp;·&nbsp; Format: Name, email@address.com, Company</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row" id="stats-row" style="display: none;">
+    <div class="stat">
+      <span class="stat-number" id="sent-count">0</span>
+      <span class="stat-label">Sent</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number" id="failed-count" style="color: var(--error);">0</span>
+      <span class="stat-label">Failed</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number" id="cycle-count">0</span>
+      <span class="stat-label">Cycles</span>
+    </div>
+  </div>
+
+  <div class="send-stop-row">
+    <button class="send-btn" id="sendBtn" onclick="startSend()">🚀 START CONTINUOUS</button>
+    <button class="stop-btn" id="stopBtn" onclick="stopSending()" disabled>⏹️ STOP NOW</button>
+  </div>
+
+  <div class="log-panel" id="log-panel">
+    <div class="log-header">
+      <span class="log-dot" id="log-dot"></span>
+      Live activity
+    </div>
+    <div class="log" id="log"></div>
+  </div>
+
+</div>
+
+<script>
+let isSending = false;
+
+// ── URL validation ──────────────────────────────────────────────
+function validateUrl() {
+  const val = document.getElementById('appsScriptUrl').value.trim();
+  const statusEl = document.getElementById('urlStatus');
+  const dot = statusEl.querySelector('.url-status-dot');
+  const text = statusEl.querySelector('span:last-child');
+
+  if (!val) {
+    statusEl.className = 'url-status';
+    text.textContent = 'Paste your /exec URL above';
+    return false;
+  }
+
+  const looksValid = val.startsWith('https://script.google.com/macros/s/') && val.endsWith('/exec');
+
+  if (looksValid) {
+    statusEl.className = 'url-status valid';
+    text.textContent = 'Looks good — Apps Script URL detected';
+    return true;
+  } else {
+    statusEl.className = 'url-status invalid';
+    text.textContent = 'Must start with https://script.google.com/macros/s/ and end with /exec';
+    return false;
+  }
+}
+
+function getScriptUrl() {
+  return document.getElementById('appsScriptUrl').value.trim();
+}
+
+// ── Recipient counter ──────────────────────────────────────────
+function updateCount() {
+  const lines = document.getElementById('recipients').value.trim().split('\n').filter(l => l.trim());
+  const valid = lines.filter(l => l.includes('@'));
+  document.getElementById('rec-count').textContent = valid.length === 0
+    ? '— no recipients yet'
+    : valid.length + ' recipient' + (valid.length !== 1 ? 's' : '') + ' detected';
+}
+
+function insertVar(v) {
+  const ta = document.getElementById('body');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  ta.value = ta.value.slice(0, s) + v + ta.value.slice(e);
+  ta.selectionStart = ta.selectionEnd = s + v.length;
+  ta.focus();
+}
+
+// ── Logging ────────────────────────────────────────────────────
+function log(msg, cls = '') {
+  document.getElementById('log-panel').style.display = 'block';
+  const el = document.getElementById('log');
+  const d = document.createElement('div');
+  d.className = 'log-line ' + cls;
+  d.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  el.appendChild(d);
+  el.scrollTop = el.scrollHeight;
+}
+
+function updateStats(sent, failed, cycles) {
+  document.getElementById('sent-count').textContent = sent;
+  document.getElementById('failed-count').textContent = failed;
+  document.getElementById('cycle-count').textContent = cycles;
+  document.getElementById('stats-row').style.display = 'flex';
+}
+
+// ── Parse recipients ───────────────────────────────────────────
+function parseRecipients() {
+  return document.getElementById('recipients').value.trim().split('\n')
+    .filter(l => l.trim())
+    .map(line => {
+      const parts = line.split(',').map(p => p.trim());
+      return { name: parts[0] || '', email: parts[1] || '', company: parts[2] || '' };
+    })
+    .filter(r => r.email.includes('@'));
+}
+
+// ── Send a single email ────────────────────────────────────────
+async function sendSingleEmail(r, subject, body, scriptUrl) {
+  const personalised = body
+    .replace(/\{name\}/g, r.name)
+    .replace(/\{company\}/g, r.company)
+    .replace(/\{email\}/g, r.email);
+
+  try {
+    const res = await fetch(scriptUrl, {
+      method: 'POST',
+      body: JSON.stringify({ to: r.email, subject, body: personalised }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      log(`✓  ${r.name} <${r.email}>`, 'ok');
+      return true;
+    } else {
+      log(`✗  ${r.email} — ${data.error}`, 'err');
+      return false;
+    }
+  } catch(e) {
+    log(`✗  ${r.email} — ${e.message}`, 'err');
+    return false;
+  }
+}
+
+// ── Continuous send loop ───────────────────────────────────────
+async function continuousSendLoop() {
+  const scriptUrl = getScriptUrl();
+  const subject = document.getElementById('subject').value.trim();
+  const body = document.getElementById('body').value.trim();
+  const recipients = parseRecipients();
+
+  if (!scriptUrl || !validateUrl()) {
+    log('No valid Apps Script URL. STOPPING.', 'err');
+    stopSending(); return;
+  }
+  if (!subject || !body || recipients.length === 0) {
+    log('Missing fields. STOPPING.', 'err');
+    stopSending(); return;
+  }
+
+  let sent = 0, failed = 0, cycle = 0;
+  log(`🚀 CONTINUOUS MODE STARTED — ${recipients.length} recipients/cycle`, 'info');
+  log(`⏹️ Click STOP anytime. No delays between emails.`, 'info');
+
+  while (isSending) {
+    cycle++;
+    log(`🔄 Cycle #${cycle} → ${recipients.length} emails`, 'info');
+
+    for (let i = 0; i < recipients.length && isSending; i++) {
+      const success = await sendSingleEmail(recipients[i], subject, body, scriptUrl);
+      if (success) sent++; else failed++;
+      updateStats(sent, failed, cycle);
+    }
+  }
+
+  log(`⏹️ STOPPED — ${sent} sent, ${failed} failed, ${cycle} cycles`, 'info');
+}
+
+// ── Start / Stop ───────────────────────────────────────────────
+function startSend() {
+  if (isSending) return;
+
+  const scriptUrl = getScriptUrl();
+  if (!scriptUrl) {
+    log('Enter your Apps Script URL first.', 'err');
+    document.getElementById('appsScriptUrl').focus();
+    document.getElementById('log-panel').style.display = 'block';
+    return;
+  }
+  if (!validateUrl()) {
+    log('Apps Script URL looks invalid. Check the format.', 'err');
+    document.getElementById('appsScriptUrl').focus();
+    document.getElementById('log-panel').style.display = 'block';
+    return;
+  }
+
+  const subject = document.getElementById('subject').value.trim();
+  const body = document.getElementById('body').value.trim();
+  const recipients = parseRecipients();
+
+  if (!subject) { log('Enter subject line.', 'err'); document.getElementById('log-panel').style.display='block'; return; }
+  if (!body)    { log('Enter email body.', 'err');    document.getElementById('log-panel').style.display='block'; return; }
+  if (recipients.length === 0) { log('No valid recipients.', 'err'); document.getElementById('log-panel').style.display='block'; return; }
+
+  isSending = true;
+  document.getElementById('sendBtn').disabled = true;
+  document.getElementById('stopBtn').disabled = false;
+  document.getElementById('sendBtn').textContent = 'Sending...';
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('log-dot').style.animation = 'pulse 1.5s ease infinite';
+
+  continuousSendLoop();
+}
+
+function stopSending() {
+  isSending = false;
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('stopBtn').disabled = true;
+  document.getElementById('sendBtn').textContent = '🚀 START CONTINUOUS';
+  document.getElementById('log-dot').style.animation = 'none';
+  log('🛑 STOPPED BY USER', 'info');
+}
+
+window.addEventListener('beforeunload', () => { if (isSending) isSending = false; });
+</script>
+</body>
+</html>
